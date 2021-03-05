@@ -1,0 +1,4 @@
+# Project exclude paths
+/target/
+.idea
+java-backend-retrofit-testing.iml
