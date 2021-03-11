@@ -8,9 +8,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import retrofit2.Response;
+import ru.geekbrains.mybatis.dao.ProductsMapper;
 import ru.geekbrains.retrofit.CategoryType;
 import ru.geekbrains.retrofit.dto.Product;
 import ru.geekbrains.retrofit.servise.ProductService;
+import ru.geekbrains.retrofit.util.DbUtils;
 import ru.geekbrains.retrofit.util.RetrofitUtils;
 
 import java.io.IOException;
@@ -37,6 +39,12 @@ public class DeleteProductTests {
                 .withCategoryTitle(CategoryType.FOOD.getTitle());
         Response<Product> response = productService.createProductPositive(newProduct).execute();
         productId = response.body().getId();
+        String title = response.body().getTitle();
+        Integer price = response.body().getPrice();
+        String categoryTitle = response.body().getCategoryTitle();
+        assertThat(price, CoreMatchers.is(DbUtils.getProductsMapper().selectByPrimaryKey(Long.valueOf(productId)).getPrice()));
+        assertThat(title, CoreMatchers.is(DbUtils.getProductsMapper().selectByPrimaryKey(Long.valueOf(productId)).getTitle()));
+        assertThat(categoryTitle, CoreMatchers.is("Food"));
      }
 
     @Test
@@ -44,18 +52,19 @@ public class DeleteProductTests {
         Response<ResponseBody> response = productService.deleteProduct(productId).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
         assertThat(response.code(), CoreMatchers.is(200));
+        assertThat(DbUtils.getProductsMapper().selectByPrimaryKey(Long.valueOf(productId)), CoreMatchers.nullValue());
     }
-
-    @Test
-    void deleteProductRepeatTest() throws IOException {
-        productService.deleteProduct(productId).execute();
-        Response<ResponseBody> response = productService
-                .deleteProduct(productId).execute();
-        assertThat(response.isSuccessful(), CoreMatchers.is(true));
-        assertThat(response.code(), CoreMatchers
-                .anyOf(CoreMatchers.is(200), CoreMatchers.is(204)));
-    }
-
+//
+//    @Test
+//    void deleteProductRepeatTest() throws IOException {
+//        productService.deleteProduct(productId).execute();
+//        Response<ResponseBody> response = productService
+//                .deleteProduct(productId).execute();
+//        assertThat(response.isSuccessful(), CoreMatchers.is(true));
+//        assertThat(response.code(), CoreMatchers
+//                .anyOf(CoreMatchers.is(200), CoreMatchers.is(204)));
+//    }
+//
     @Test
     void deleteProductByNotFoundIdTest() throws IOException {
         Response<ResponseBody> response = productService
@@ -64,27 +73,27 @@ public class DeleteProductTests {
         assertThat(response.code(), CoreMatchers
                 .anyOf(CoreMatchers.is(400), CoreMatchers.is(404)));
     }
-
-    @Test
-    void deleteProductWithoutIdTest() throws IOException {
-        Response<ResponseBody> response = productService.deleteProductWithoutId().execute();
-        assertThat(response.isSuccessful(), CoreMatchers.is(false));
-        assertThat(response.code(), CoreMatchers.is(400));
-    }
-
-    @Test
-    void deleteProductWitStringIdTest() throws IOException {
-        Response<ResponseBody> response = productService
-                .deleteProductWithStringId(faker.cat().name()).execute();
-        assertThat(response.isSuccessful(), CoreMatchers.is(false));
-        assertThat(response.code(), CoreMatchers.is(400));
-    }
+//
+//    @Test
+//    void deleteProductWithoutIdTest() throws IOException {
+//        Response<ResponseBody> response = productService.deleteProductWithoutId().execute();
+//        assertThat(response.isSuccessful(), CoreMatchers.is(false));
+//        assertThat(response.code(), CoreMatchers.is(400));
+//    }
+//
+//    @Test
+//    void deleteProductWitStringIdTest() throws IOException {
+//        Response<ResponseBody> response = productService
+//                .deleteProductWithStringId(faker.cat().name()).execute();
+//        assertThat(response.isSuccessful(), CoreMatchers.is(false));
+//        assertThat(response.code(), CoreMatchers.is(400));
+//    }
 
     @AfterEach
-    void tearDown() {
-        try {
-            productService.deleteProduct(productId).execute();
-        } catch (IOException e) {
+    void tearDown() throws IOException {
+        if (productId != null){
+            DbUtils.getProductsMapper().deleteByPrimaryKey(Long.valueOf(productId));
+            assertThat(DbUtils.getProductsMapper().selectByPrimaryKey(Long.valueOf(productId)), CoreMatchers.nullValue());
         }
     }
 }
