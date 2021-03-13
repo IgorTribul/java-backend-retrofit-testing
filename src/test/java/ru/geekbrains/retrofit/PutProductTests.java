@@ -9,36 +9,36 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import retrofit2.Converter;
 import retrofit2.Response;
-import ru.geekbrains.retrofit.CategoryType;
+import ru.geekbrains.mybatis.dao.ProductsMapper;
 import ru.geekbrains.retrofit.dto.ErrorBody;
 import ru.geekbrains.retrofit.dto.Product;
 import ru.geekbrains.retrofit.servise.ProductService;
+import ru.geekbrains.retrofit.util.DbUtils;
 import ru.geekbrains.retrofit.util.RetrofitUtils;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.net.MalformedURLException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PutProductTests {
     private static ProductService productService;
+    private static ProductsMapper productsMapper;
     private Faker faker = new Faker();
     private Response<Product> response;
+    private Response<Product> updateResponse;
     private Integer productId;
     private Product newProduct;
 
     @BeforeAll
-    static void beforeAll() throws MalformedURLException {
+    static void beforeAll() throws IOException {
         productService = RetrofitUtils.getRetrofit().create(ProductService.class);
+        productsMapper = DbUtils.getProductsMapper();
     }
 
     @BeforeEach
     void setUp() throws IOException {
-        newProduct = new Product()
-                .withTitle(faker.food().ingredient())
-                .withCategoryTitle(CategoryType.ELECTRONIC.getTitle())
-                .withPrice((int) (Math.random() * 1000 + 1));
+        newProduct = new PreparedData().getNewProduct();
         response = productService.createProductPositive(newProduct).execute();
         productId = response.body().getId();
     }
@@ -46,7 +46,7 @@ public class PutProductTests {
     @Test
     void updateProductPositiveTest() throws IOException {
         assert response.body() != null;
-        Response<Product> updateResponse = productService
+        updateResponse = productService
                 .updateProductPositive(new Product()
                         .withId(productId)
                         .withTitle(faker.food().measurement())
@@ -62,13 +62,17 @@ public class PutProductTests {
         assertThat(updateResponse.body().getPrice(),
                 CoreMatchers.not(newProduct.getPrice()));
         assertThat(updateResponse.body().getCategoryTitle(),
-                CoreMatchers.equalTo(CategoryType.ELECTRONIC.getTitle()));
+                CoreMatchers.equalTo(CategoryType.FOOD.getTitle()));
+        assertThat(productsMapper.selectByPrimaryKey(Long.valueOf(productId)).getPrice(),
+                CoreMatchers.is(updateResponse.body().getPrice()));
+        assertThat(productsMapper.selectByPrimaryKey(Long.valueOf(productId)).getTitle(),
+                CoreMatchers.is(updateResponse.body().getTitle()));
     }
 
     @Test
     void updateProductWithBadCategoryTest() throws IOException {
         assert response.body() != null;
-        Response<Product> updateResponse = productService
+        updateResponse = productService
                 .updateProductPositive(new Product()
                         .withId(productId)
                         .withTitle(faker.food().ingredient())
@@ -82,7 +86,7 @@ public class PutProductTests {
     @Test
     void updateProductNegativeTest() throws IOException {
         assert response.body() != null;
-        Response<Product> updateResponse = productService
+        updateResponse = productService
                 .updateProductPositive(new Product()
                         .withTitle(faker.food().measurement())
                         .withPrice((int) (Math.random() * 10000))
@@ -99,12 +103,10 @@ public class PutProductTests {
     }
 
     @AfterEach
-    void deleteProduct(){
-        try {
-            if (productId != null)
-                productService.deleteProduct(productId).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
+    void deleteProduct() throws IOException {
+        if (productId != null) {
+            productsMapper.deleteByPrimaryKey(Long.valueOf(productId));
+            assertThat(productsMapper.selectByPrimaryKey(Long.valueOf(productId)), CoreMatchers.nullValue());
         }
     }
 }

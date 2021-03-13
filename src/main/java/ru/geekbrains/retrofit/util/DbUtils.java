@@ -26,6 +26,6 @@ public class DbUtils {
         String resource = "mybatisConfig.xml";
         InputStream stream = Resources.getResourceAsStream(resource);
         SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder().build(stream);
-        return sessionFactory.openSession();
+        return sessionFactory.openSession(true);
     }
 }
