@@ -1,6 +1,9 @@
 package ru.geekbrains.retrofit;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +32,8 @@ public class PostProductTests {
         productService = RetrofitUtils.getRetrofit().create(ProductService.class);
     }
 
+    @Feature(value = "Создание нового продукта")
+    @Story(value = "Positive tests")
     @Test
     void createProductPositiveTest() throws IOException {
         Response<Product> response = productService
@@ -40,7 +45,10 @@ public class PostProductTests {
         assertThat(response.code(), CoreMatchers.is(201));
     }
 
+    @Feature(value = "Создание нового продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Создание с ненулевым ID")
     void createProductWithIdNegativeTest() throws IOException {
         bodyResponse = productService
                 .createProductNegative(new PreparedData().getNewProduct()
@@ -50,7 +58,10 @@ public class PostProductTests {
         assertThat(bodyResponse.errorBody().string(), CoreMatchers.containsString("Id must be null for new entity"));
     }
 
+    @Feature(value = "Создание нового продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Создание с некорректной категорией")
     void createProductWithFakeCategoryTitleTest() throws IOException {
         bodyResponse = productService
                 .createProductNegative(new Product().withCategoryTitle(faker.food().spice())).execute();
@@ -59,7 +70,10 @@ public class PostProductTests {
                 .anyOf(CoreMatchers.is(400), CoreMatchers.is(404)));
     }
 
+    @Feature(value = "Создание нового продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Создание с без указания параметров")
     void createProductWithEmptyBodyTest() throws IOException {
         bodyResponse = productService
                 .createProductNegative(new Product()).execute();

@@ -1,6 +1,9 @@
 package ru.geekbrains.retrofit;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,7 +31,10 @@ public class GetCategoryTests {
        categoryService = RetrofitUtils.getRetrofit().create(CategoryService.class);
     }
 
+    @Feature(value = "Получение категории продуктов")
+    @Story(value = "Positive tests")
     @Test
+    @Description(value = "Получение категории FOOD")
     void getCategoryByIdTest() throws IOException {
         response = categoryService.getCategoryById(CategoryType.FOOD.getId()).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
@@ -41,7 +47,10 @@ public class GetCategoryTests {
         assertThat(response.body().getId(), CoreMatchers.is(DbUtils.getCategoriesMapper().selectByPrimaryKey(1).getId()));
     }
 
+    @Feature(value = "Получение категории продуктов")
+    @Story(value = "Positive tests")
     @Test
+    @Description(value = "Получение категории ELECTRONIC")
     void getCategoryByIdTest2() throws IOException {
         response = categoryService.getCategoryById(CategoryType.ELECTRONIC.getId()).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
@@ -52,7 +61,11 @@ public class GetCategoryTests {
             assertThat(products.get(i).getCategoryTitle(), CoreMatchers.is(CategoryType.ELECTRONIC.getTitle()));
         }
     }
+
+    @Feature(value = "Получение категории продуктов")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Попытка получить все категории сразу")
     void getAllCategoriesTest() throws IOException {
         response = categoryService.getAllCategories().execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(false));
@@ -61,7 +74,11 @@ public class GetCategoryTests {
         assertThat(response.errorBody().string(),
                 CoreMatchers.containsString("Not Found"));
     }
+
+    @Feature(value = "Получение категории продуктов")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Попытка получить категорию с несуществующим ID")
     void getCategoryByNotFoundIdTest() throws IOException {
         response = categoryService
                 .getCategoryById((int) (Math.random() * 1000) +10).execute();
@@ -71,7 +88,11 @@ public class GetCategoryTests {
         assertThat(response.errorBody().string(),
                 CoreMatchers.containsString("Unable to find category with id:"));
     }
+
+    @Feature(value = "Получение категории продуктов")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Попытка получить категорию с некорректным ID")
     void getCategoryByStringIdTest() throws IOException {
         response = categoryService
                 .getCategoryByStringId(new Faker().beer().name()).execute();

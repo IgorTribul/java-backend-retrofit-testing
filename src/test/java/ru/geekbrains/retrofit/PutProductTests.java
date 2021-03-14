@@ -1,6 +1,9 @@
 package ru.geekbrains.retrofit;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +46,8 @@ public class PutProductTests {
         productId = response.body().getId();
     }
 
+    @Feature(value = "Изменение продукта")
+    @Story(value = "Positive tests")
     @Test
     void updateProductPositiveTest() throws IOException {
         assert response.body() != null;
@@ -69,7 +74,10 @@ public class PutProductTests {
                 CoreMatchers.is(updateResponse.body().getTitle()));
     }
 
+    @Feature(value = "Изменение продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Изменение с указанием несуществующей категорией")
     void updateProductWithBadCategoryTest() throws IOException {
         assert response.body() != null;
         updateResponse = productService
@@ -83,7 +91,10 @@ public class PutProductTests {
                 .anyOf(CoreMatchers.is(400), CoreMatchers.is(404)));
     }
 
+    @Feature(value = "Изменение продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Изменение без указания ID")
     void updateProductNegativeTest() throws IOException {
         assert response.body() != null;
         updateResponse = productService

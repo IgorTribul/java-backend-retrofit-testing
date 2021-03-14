@@ -1,6 +1,7 @@
 package ru.geekbrains.retrofit;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Feature;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.*;
 import ru.geekbrains.mybatis.dao.CategoriesMapper;
@@ -29,6 +30,7 @@ public class InsertUpdateTests {
     }
 
     @Order(1)
+    @Feature(value = "Создание и изменение продукта с использованием mybatis")
     @Test
     void insertNewProduct() throws IOException {
         Products newProductToInsert = new PreparedData().getNewProducts();
@@ -41,6 +43,7 @@ public class InsertUpdateTests {
     }
 
     @Order(2)
+    @Feature(value = "Создание и изменение продукта с использованием mybatis")
     @Test
     void insertNewCategory() throws IOException {
         Categories newCategoryToInsert = new Categories();
@@ -52,6 +55,7 @@ public class InsertUpdateTests {
     }
 
     @Order(3)
+    @Feature(value = "Создание и изменение продукта с использованием mybatis")
     @Test
     void updateInsertedProduct() throws IOException {
         ProductsExample productsExample = new ProductsExample();

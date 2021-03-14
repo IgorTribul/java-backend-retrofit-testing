@@ -1,6 +1,9 @@
 package ru.geekbrains.retrofit;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +43,10 @@ public class GetProductTests {
         productId = response.body().getId();
     }
 
+    @Feature(value = "Получение продукта")
+    @Story(value = "Positive tests")
     @Test
+    @Description(value = "Получение всех продуктов всех категорий")
     void getAllProductsTest() throws IOException {
         Response<Product[]>response2 = productService.getProducts().execute();
         assertThat(response2.isSuccessful(), CoreMatchers.is(true));
@@ -48,7 +54,10 @@ public class GetProductTests {
         assertThat(response2.code(), CoreMatchers.is(200));
     }
 
+    @Feature(value = "Получение продукта")
+    @Story(value = "Positive tests")
     @Test
+    @Description(value = "Получение всех продуктов всех категорий")
     void getProductByIdTest() throws IOException {
         response = productService.getProductById(productId).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
@@ -60,7 +69,10 @@ public class GetProductTests {
 
     }
 
+    @Feature(value = "Получение продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Попытка получить продукт с несуществующим ID")
     void getProductByNotFoundIdTest() throws IOException {
         response = productService.getProductById((int) (Math.random()*1000)+10000).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(false));
@@ -70,7 +82,10 @@ public class GetProductTests {
                 CoreMatchers.containsString("Unable to find product with id:"));
     }
 
+    @Feature(value = "Получение продукта")
+    @Story(value = "Negative tests")
     @Test
+    @Description(value = "Попытка получить продукт с некорректным ID")
     void getProductByStringIdTest() throws IOException {
         response = productService.getProductByString(faker.beer().name()).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(false));
